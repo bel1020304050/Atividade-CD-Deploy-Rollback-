@@ -1,15 +1,15 @@
 
-# Plano de Deploy e Rollback — Sistema Web de Biblioteca
+ Plano de Deploy e Rollback — Sistema Web de Biblioteca
 
-## 1. Introdução
+ 1. Introdução
 
-Esta atividade apresenta um plano de Entrega Contínua (CD), implantação (deploy), observabilidade e recuperação (rollback) para um sistema web de biblioteca. A proposta considera a necessidade de manter o serviço disponível, reduzir os riscos de falhas e garantir a segurança das operações de empréstimo de livros.
+Este trabalho apresenta uma estratégia de Continuous Delivery (CD) para um sistema de biblioteca, contemplando planejamento de deploy, rollback, fluxo do pipeline e critérios para tomada de decisão durante uma implantação.
 
-## 2. Objetivo
+ 2. Objetivo
 
-Definir uma estratégia segura para implantar uma nova versão do sistema, estabelecer critérios de validação e determinar procedimentos de recuperação caso a implantação apresente problemas.
+Este trabalho apresenta uma estratégia de Continuous Delivery (CD) para um sistema de biblioteca, contemplando planejamento de deploy, rollback, fluxo do pipeline e critérios para tomada de decisão durante uma implantação.
 
-## 3. Cenário do Sistema
+ 3. Cenário do Sistema
 
 - Sistema: aplicação web de biblioteca.
 - Período de maior utilização: início de cada semestre.
@@ -18,11 +18,12 @@ Definir uma estratégia segura para implantar uma nova versão do sistema, estab
 - Mudança principal: alteração da funcionalidade de empréstimos.
 - Métricas disponíveis: taxa de erros e latência.
 
-## 4. Arquivos do Trabalho
+ 4. Estrutura do Repositório
 
-- `01-plano-de-deploy.md`: estratégia e etapas da implantação.
-- `02-plano-de-rollback.md`: critérios e procedimentos de recuperação.
-- `03-fluxo-do-pipeline.md`: fluxo visual do processo de entrega.
+- README.md – apresentação do trabalho.
+- 01-plano-de-deploy.md – planejamento da implantação.
+- 02-plano-de-rollback.md – procedimento de recuperação.
+- 03-fluxo-do-pipeline.md – fluxo do pipeline de CD.
 
 ## 5. Estratégia Escolhida
 
