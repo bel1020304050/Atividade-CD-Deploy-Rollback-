@@ -14,7 +14,7 @@ flowchart TD
     C -->|Não| D[Interromper e corrigir]
     D --> A
     C -->|Sim| E[Gerar e identificar artefato]
-    E --> F[Promover o mesmo artefato]
+   E --> F[Promover o mesmo artefato sem recompilar]
     F --> G[Homologação]
     G --> H{Testes funcionais aprovados?}
     H -->|Não| D
@@ -33,6 +33,8 @@ flowchart TD
     Q -->|Não| R
     R --> T[Verificar aplicação e banco]
     T --> U[Registrar incidente e evidências]
+    S --> V[Fim: deploy concluído]
+    U --> W[Fim: rollback registrado]
 ```
 
 3. Gates do Pipeline
