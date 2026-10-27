@@ -25,17 +25,17 @@ Este trabalho apresenta uma estratégia de Continuous Delivery (CD) para um sist
 - 02-plano-de-rollback.md – procedimento de recuperação.
 - 03-fluxo-do-pipeline.md – fluxo do pipeline de CD.
 
-## 5. Estratégia Escolhida
+ 5. Estratégia Escolhida
 
 Será utilizada a estratégia Blue/Green, com ambientes equivalentes para a versão atual e a nova versão. A nova versão será validada antes de receber o tráfego principal. A estratégia será acompanhada de testes, monitoramento e um plano de rollback.
 
 Como o banco de dados é compartilhado, as alterações serão realizadas de forma compatível com a versão anterior da aplicação.
 
-## 6. Resultado Esperado
+ 6. Resultado Esperado
 
 Realizar a implantação de maneira controlada, validar as operações de empréstimo e manter a indisponibilidade dentro do limite de 5 minutos, com um procedimento de recuperação previamente definido.
 
-## 7. Equipe
+ 7. Equipe
 
 - Integrantes: Isabely e Felipe Do Nascimento 
 - Disciplina: Cloud Computing e DevOps Avançado.
