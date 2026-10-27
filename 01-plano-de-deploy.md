@@ -7,11 +7,11 @@ Implantar uma nova versão do sistema web de biblioteca de forma segura, mantend
 
  2. Artefato e Versionamento
 
-- Versão atual: 1.0.0.
-- Nova versão: 1.1.0.
-- Identificação do artefato: versão, tag Git e SHA do commit.
-- Política: o artefato aprovado nos testes será o mesmo promovido para homologação e produção, sem recompilação entre os ambientes.
-- Registro: cada implantação deverá ter data, versão, responsável e resultado.
+ Versão atual: 1.0.0.
+ Nova versão: 1.1.0.
+ Identificação do artefato: versão, tag Git e SHA do commit.
+ Política: o artefato aprovado nos testes será o mesmo promovido para homologação e produção, sem recompilação entre os ambientes.
+ Registro: cada implantação deverá ter data, versão, responsável e resultado.
 
 A versão 1.1.0 representa uma atualização funcional na operação de empréstimos.
 
@@ -44,20 +44,18 @@ Justificativa:
 
 A estratégia exige capacidade para manter os dois ambientes disponíveis. A troca de tráfego deverá ser testada previamente para respeitar o limite de indisponibilidade de 5 minutos.
 
- 5. Pré-condições
+ 5. Pré-condições:
 
-Antes de iniciar o deploy, é necessário:
-
-1. Ter a versão 1.1.0 identificada e aprovada.
-2. Ter os testes obrigatórios aprovados.
-3. Confirmar que o ambiente Green está disponível e saudável.
-4. Confirmar que o banco de dados está acessível.
-5. Verificar se as alterações no banco são compatíveis com a versão 1.0.0.
-6. Criar e verificar um backup do banco de dados.
-7. Confirmar que a configuração e os segredos estão protegidos.
-8. Verificar as métricas atuais de erro e latência.
-9. Confirmar a disponibilidade dos responsáveis pelo deploy e rollback.
-10. Evitar a implantação durante o pico de utilização no início do semestre, sempre que possível.
+ Ter a versão 1.1.0 identificada e aprovada.
+ Ter os testes obrigatórios aprovados.
+ Confirmar que o ambiente Green está disponível e saudável.
+ Confirmar que o banco de dados está acessível.
+ Verificar se as alterações no banco são compatíveis com a versão 1.0.0.
+ Criar e verificar um backup do banco de dados.
+ Confirmar que a configuração e os segredos estão protegidos.
+ Verificar as métricas atuais de erro e latência.
+ Confirmar a disponibilidade dos responsáveis pelo deploy e rollback.
+ Evitar a implantação durante o pico de utilização no início do semestre, sempre que possível.
 
 Se uma condição obrigatória não for atendida, a implantação deverá ser interrompida.
 
@@ -83,13 +81,13 @@ Se uma condição obrigatória não for atendida, a implantação deverá ser in
 
 Os smoke tests são verificações rápidas realizadas após a implantação.
 
-- ST01: verificar se a página inicial do sistema abre corretamente.
-- ST02: verificar se o usuário consegue realizar login.
-- ST03: verificar se o catálogo de livros pode ser consultado.
-- ST04: verificar se um empréstimo pode ser registrado corretamente em ambiente de teste.
-- ST05: verificar se a devolução de um livro continua funcionando.
-- ST06: verificar se o sistema consulta e grava os dados corretamente no banco.
-- ST07: verificar se os endpoints de saúde da aplicação respondem adequadamente.
+ ST01: verificar se a página inicial do sistema abre corretamente.
+ ST02: verificar se o usuário consegue realizar login.
+ST03: verificar se o catálogo de livros pode ser consultado.
+ST04: verificar se um empréstimo pode ser registrado corretamente em ambiente de teste.
+ ST05: verificar se a devolução de um livro continua funcionando.
+ST06: verificar se o sistema consulta e grava os dados corretamente no banco.
+ST07: verificar se os endpoints de saúde da aplicação respondem adequadamente.
 
 Os testes de empréstimo devem utilizar dados de teste controlados, evitando a criação de empréstimos reais ou duplicados.
 
@@ -97,15 +95,15 @@ Os testes de empréstimo devem utilizar dados de teste controlados, evitando a c
 
 A versão somente poderá receber o tráfego principal quando todos os critérios forem atendidos:
 
-- Testes obrigatórios aprovados.
-- Nenhum erro crítico ou bloqueador conhecido.
-- Health checks aprovados.
-- Smoke tests aprovados.
-- Operações de empréstimo e devolução funcionando corretamente.
-- Banco de dados acessível e consistente.
-- Taxa de erros abaixo de 2% durante a janela de validação.
-- Latência p95 inferior a 1 segundo, como meta inicial proposta, ou dentro do limite operacional previamente aprovado.
-- Aprovação registrada pelo responsável pelo deploy.
+ Testes obrigatórios aprovados.
+Nenhum erro crítico ou bloqueador conhecido.
+ Health checks aprovados.
+ Smoke tests aprovados.
+ Operações de empréstimo e devolução funcionando corretamente.
+ Banco de dados acessível e consistente.
+ Taxa de erros abaixo de 2% durante a janela de validação.
+ Latência p95 inferior a 1 segundo, como meta inicial proposta, ou dentro do limite operacional previamente aprovado.
+Aprovação registrada pelo responsável pelo deploy.
 
 A taxa de erros e a latência deverão ser avaliadas por pelo menos 5 minutos antes da promoção. Os limites propostos devem ser ajustados caso a linha de base real do sistema indique valores diferentes.
 
@@ -113,22 +111,22 @@ A taxa de erros e a latência deverão ser avaliadas por pelo menos 5 minutos an
 
 Durante e após o deploy, a equipe deverá acompanhar:
 
-- Taxa de erros HTTP e erros nas operações de empréstimo.
-- Latência das requisições, principalmente o percentil p95.
-- Disponibilidade e resultado dos health checks.
-- Logs de falhas e exceções.
-- Resultado dos smoke tests.
-- Erros de conexão e inconsistências no banco de dados.
+ Taxa de erros HTTP e erros nas operações de empréstimo.
+ Latência das requisições, principalmente o percentil p95.
+ Disponibilidade e resultado dos health checks.
+ Logs de falhas e exceções.
+ Resultado dos smoke tests.
+Erros de conexão e inconsistências no banco de dados.
 
 As métricas serão comparadas com os valores observados antes da implantação.
 
  10. Responsáveis
 
-- Responsável pelo deploy: coordena a implantação e autoriza a troca de tráfego.
-- Responsável pelos testes: executa os testes e registra as evidências.
-- Responsável pelo banco de dados: verifica backup, migrações e compatibilidade.
-- Responsável pela observabilidade: acompanha métricas, logs e alertas.
-- Responsável pelo rollback: coordena a recuperação quando os critérios de sucesso não forem atendidos.
+ Responsável pelo deploy: coordena a implantação e autoriza a troca de tráfego.
+Responsável pelos testes: executa os testes e registra as evidências.
+ Responsável pelo banco de dados: verifica backup, migrações e compatibilidade.
+ Responsável pela observabilidade: acompanha métricas, logs e alertas.
+ Responsável pelo rollback: coordena a recuperação quando os critérios de sucesso não forem atendidos.
 
 Em uma equipe pequena, uma pessoa poderá acumular funções, desde que as responsabilidades estejam definidas.
 
