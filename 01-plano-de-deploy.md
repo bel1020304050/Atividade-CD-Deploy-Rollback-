@@ -32,6 +32,12 @@ Ambiente semelhante à produção, utilizado para validar a nova versão antes d
 
 Os ambientes deverão possuir configurações adequadas e acesso controlado ao banco de dados compartilhado.
 
+Compatibilidade do banco de dados compartilhado
+
+Durante a implantação, os ambientes Blue e Green poderão acessar o mesmo banco de dados. Por isso, qualquer alteração no esquema ou nos dados deverá ser compatível com a versão atual e com a nova versão da aplicação.
+
+As migrações deverão ser planejadas para permitir a convivência temporária das duas versões. Antes do deploy, a equipe deverá validar as alterações em ambiente de testes e confirmar que o rollback da aplicação continuará possível. O backup deverá ser verificado, e qualquer restauração do banco deverá seguir um procedimento específico, considerando o risco de perda de dados.
+
  4. Estratégia de Deploy
 
 A estratégia escolhida é Blue/Green.
@@ -106,6 +112,12 @@ Nenhum erro crítico ou bloqueador conhecido.
 Aprovação registrada pelo responsável pelo deploy.
 
 A taxa de erros e a latência deverão ser avaliadas por pelo menos 5 minutos antes da promoção. Os limites propostos devem ser ajustados caso a linha de base real do sistema indique valores diferentes.
+
+Condições para interromper a promoção
+
+A promoção deverá ser interrompida caso a taxa de erros atinja ou ultrapasse 2%, a latência p95 atinja ou ultrapasse 1 segundo, os health checks falhem ou alguma operação crítica de empréstimo ou devolução apresente erro.
+
+Esses limites são metas iniciais propostas para o exercício e deverão ser confirmados com base na linha de base do sistema. Se houver erro crítico, inconsistência no banco de dados ou risco de perda de dados, a equipe deverá interromper a implantação e avaliar a execução do rollback conforme o plano definido.
 
  9. Observabilidade
 
