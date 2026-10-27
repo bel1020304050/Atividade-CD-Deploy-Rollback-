@@ -25,16 +25,16 @@ Os limites numéricos são critérios iniciais propostos para o plano e deverão
 
  3. Procedimento de Rollback:
 
- Confirmar a falha por meio das métricas, logs e testes;
- Interromper novas etapas de implantação;
- Comunicar a decisão ao responsável pelo deploy e ao restante da equipe;
- Redirecionar o tráfego principal para o ambiente Blue, que mantém a versão estável 1.0.0;
- Confirmar que a versão anterior está saudável e recebendo requisições;
- Desativar a funcionalidade nova por meio de uma feature flag, caso essa opção esteja implementada e seja necessária;
- Verificar login, consulta de livros, empréstimos e devoluções;
- Conferir os registros e a integridade dos dados no banco compartilhado;
- Monitorar as métricas após a recuperação;
- Registrar o incidente, a causa identificada, as ações executadas e os resultados;
+ 1. Confirmar a falha por meio das métricas, logs e testes;
+ 2. Interromper novas etapas de implantação;
+ 3. Comunicar a decisão ao responsável pelo deploy e ao restante da equipe;
+ 4 .Redirecionar o tráfego principal para o ambiente Blue, que mantém a versão estável 1.0.0;
+5. Confirmar que a versão anterior está saudável e recebendo requisições;
+6. Desativar a funcionalidade nova por meio de uma feature flag, caso essa opção esteja implementada e seja necessária;
+7. Verificar login, consulta de livros, empréstimos e devoluções;
+8. Conferir os registros e a integridade dos dados no banco compartilhado;
+9. Monitorar as métricas após a recuperação;
+10. Registrar o incidente, a causa identificada, as ações executadas e os resultados;
 
 O ambiente Blue somente poderá ser utilizado como destino de recuperação se continuar íntegro, disponível e compatível com o estado atual do banco de dados.
 
@@ -89,6 +89,7 @@ Durante o incidente, o responsável deverá:
 3. Registrar o horário de início, a identificação da versão e o impacto observado.
 4. Comunicar quando o serviço estiver novamente estável.
 5. Apresentar um resumo da causa e das medidas preventivas.
+
 
  9. Evidências do Incidente
 
