@@ -69,7 +69,7 @@ Os valores são metas propostas para a atividade e precisam ser validados com os
 
  5. Evidências da Implantação
 
-A equipe deverá guardar:
+A equipe deverá guardar: 
 
 - Identificação do commit e da versão.
 - Resultados dos testes.
