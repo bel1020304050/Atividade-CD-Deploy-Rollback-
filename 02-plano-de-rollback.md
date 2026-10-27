@@ -120,3 +120,12 @@ O incidente poderá ser encerrado quando:
 O rollback será a primeira opção quando a versão anterior continuar compatível com o banco de dados e os dados estiverem íntegros.
 
 O roll forward será considerado quando a mudança no banco for irreversível, quando a versão anterior não for compatível ou quando uma correção rápida e segura representar menor risco do que a reversão.
+
+## Riscos e Mitigações
+
+| Risco | Mitigação |
+|-------|-----------|
+| Falha durante o deploy | Executar rollback imediato. |
+| Aumento da latência | Monitorar métricas e reverter se necessário. |
+| Erro após publicação | Restaurar a versão anterior. |
+| Incompatibilidade no banco | Utilizar alterações compatíveis e validar antes da produção. |
