@@ -101,15 +101,15 @@ Os testes de empréstimo devem utilizar dados de teste controlados, evitando a c
 
 A versão somente poderá receber o tráfego principal quando todos os critérios forem atendidos:
 
- Testes obrigatórios aprovados.
-Nenhum erro crítico ou bloqueador conhecido.
- Health checks aprovados.
- Smoke tests aprovados.
- Operações de empréstimo e devolução funcionando corretamente.
- Banco de dados acessível e consistente.
- Taxa de erros abaixo de 2% durante a janela de validação.
- Latência p95 inferior a 1 segundo, como meta inicial proposta, ou dentro do limite operacional previamente aprovado.
-Aprovação registrada pelo responsável pelo deploy.
+- Testes obrigatórios aprovados;
+- Nenhum erro crítico ou bloqueador conhecido;
+- Health checks aprovados;
+- Smoke tests aprovados;
+- Operações de empréstimo e devolução funcionando corretamente;
+- Banco de dados acessível e consistente;
+- Taxa de erros abaixo de 2% durante a janela de validação;
+- Latência p95 inferior a 1 segundo, como meta inicial proposta, ou dentro do limite operacional previamente aprovado;
+- Aprovação registrada pelo responsável pelo deploy.
 
 A taxa de erros e a latência deverão ser avaliadas por pelo menos 5 minutos antes da promoção. Os limites propostos devem ser ajustados caso a linha de base real do sistema indique valores diferentes.
 
@@ -123,12 +123,12 @@ Esses limites são metas iniciais propostas para o exercício e deverão ser con
 
 Durante e após o deploy, a equipe deverá acompanhar:
 
- Taxa de erros HTTP e erros nas operações de empréstimo.
- Latência das requisições, principalmente o percentil p95.
- Disponibilidade e resultado dos health checks.
- Logs de falhas e exceções.
- Resultado dos smoke tests.
-Erros de conexão e inconsistências no banco de dados.
+- Taxa de erros HTTP e erros nas operações de empréstimo.
+- Latência das requisições, principalmente o percentil p95.
+- Disponibilidade e resultado dos health checks.
+- Logs de falhas e exceções.
+- Resultado dos smoke tests.
+-Erros de conexão e inconsistências no banco de dados.
 
 As métricas serão comparadas com os valores observados antes da implantação.
 
