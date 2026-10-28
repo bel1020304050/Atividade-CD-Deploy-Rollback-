@@ -1,5 +1,5 @@
 
- 03 — Fluxo do Pipeline de Deploy 
+ 03 — Fluxo do Pipeline de Deploy  
 
  1. Objetivo
 
