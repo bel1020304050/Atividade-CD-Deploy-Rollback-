@@ -36,7 +36,7 @@ O que muda entre os ambientes é apenas a **configuração**, aplicada de fora d
 ### 2.3 Configuração e segredos
 
 - A configuração varia por ambiente e fica fora do artefato (variáveis de ambiente ou arquivo de configuração do ambiente).
-- Segredos e credenciais vêm de mecanismo protegido (ex.: variáveis protegidas do pipeline ou cofre de segredos), nunca do repositório nem do artefato.
+- Segredos e credenciais vêm de mecanismo protegido, nunca do repositório nem do artefato.
 - A configuração do Green é validada antes da promoção.
 - Alterações de configuração são registradas (quem e quando).
 - A configuração aprovada da versão anterior é preservada para uso no rollback.
@@ -81,12 +81,12 @@ Os ambientes devem ter configurações adequadas e acesso controlado ao banco de
 
 Blue e Green acessam o mesmo banco durante a implantação. Por isso, toda alteração de esquema ou dados deve funcionar com a versão atual **e** com a nova. Para isso será usado o padrão **expandir e contrair** (expand/contract):
 
-| Fase | O que fazer | Exemplo (hipotético, para empréstimos) |
-|------|-------------|----------------------------------------|
-| 1. Expandir | Adicionar a estrutura nova sem remover nada | Criar coluna opcional (aceita nulo) para o novo dado do empréstimo |
-| 2. Conviver | A versão 1.1.0 passa a usar a estrutura nova; a 1.0.0 continua funcionando e ignora a coluna | Blue e Green rodando juntos sem erro |
-| 3. Migrar | Migrar os dados antigos para o novo formato, se necessário | Preencher a coluna para empréstimos existentes |
-| 4. Contrair | Remover a estrutura antiga **em uma release posterior**, depois que a nova estiver estável | Remoção na versão seguinte, nunca no mesmo deploy |
+| Fase | O que fazer |
+|------|-------------|
+| 1. Expandir | Adicionar a estrutura nova sem remover nada |
+| 2. Conviver | A versão 1.1.0 passa a usar a estrutura nova; a 1.0.0 continua funcionando com o banco já alterado |
+| 3. Migrar | Migrar os dados antigos para o novo formato, se necessário |
+| 4. Contrair | Remover a estrutura antiga **em uma release posterior**, depois que a nova estiver estável, nunca no mesmo deploy |
 
 Antes do deploy:
 - validar as migrações em ambiente de testes;
@@ -133,11 +133,11 @@ Se uma condição obrigatória não for atendida, a implantação é interrompid
 
 ### 8.1 Health checks
 
-| Tipo | Pergunta | Exemplo de verificação |
-|------|----------|------------------------|
-| Startup | A aplicação terminou de iniciar? | Processo iniciado e configuração carregada |
-| Liveness | O processo precisa ser reiniciado? | Endpoint `/health/live` responde |
-| Readiness | A instância pode receber tráfego? | Endpoint `/health/ready` só responde OK se o banco de dados estiver acessível |
+| Tipo | Pergunta |
+|------|----------|
+| Startup | A aplicação terminou de iniciar? |
+| Liveness | O processo precisa ser reiniciado? |
+| Readiness | A instância pode receber tráfego? (inclui o acesso ao banco de dados) |
 
 O readiness deve refletir condições reais. Um endpoint que sempre retorna `200` dá falsa segurança.
 
@@ -151,7 +151,7 @@ Verificações rápidas feitas após a implantação no Green. Não substituem o
 | ST02 | Fazer login | Usuário de teste autenticado |
 | ST03 | Consultar o catálogo de livros | Lista de livros exibida |
 | ST04 | Registrar um empréstimo (ambiente de teste) | Empréstimo gravado corretamente |
-| ST05 | Registrar a devolução de um livro | Devolução concluída e estoque atualizado |
+| ST05 | Registrar a devolução de um livro | Devolução concluída corretamente |
 | ST06 | Consultar e gravar dados no banco | Leitura e escrita sem erro |
 | ST07 | Chamar os endpoints de saúde | Respondem adequadamente |
 
@@ -169,7 +169,7 @@ Esta é a tabela de referência para promoção, interrupção e rollback. Os pl
 | Smoke tests | ST01–ST07 aprovados | Qualquer falha | Falha crítica em empréstimo ou devolução |
 | Empréstimo e devolução | Funcionando sem inconsistência | Qualquer erro | Erro que impeça registrar empréstimo |
 | Banco de dados | Acessível e consistente | Inconsistência ou risco de perda de dados | Inconsistência ou corrupção confirmada |
-| Saturação (CPU, memória, conexões) | Abaixo de 80% | Acima de 80% | Saturação que cause erros ou lentidão |
+| Saturação de recursos | Dentro da capacidade do ambiente | Recurso próximo do limite | Saturação que cause erros ou lentidão |
 
 Demais condições para promover: nenhum erro crítico conhecido e aprovação registrada do responsável pelo deploy.
 
@@ -210,7 +210,7 @@ Em uma equipe pequena, uma pessoa pode acumular funções, desde que as responsa
 | Indisponibilidade acima de 5 minutos | Testar a troca de tráfego previamente e definir responsáveis |
 | Perda de dados na recuperação | Avaliar a integridade antes de restaurar backup e preservar operações válidas |
 | Sessões de usuários perdidas na troca Blue → Green | Usar armazenamento de sessão compartilhado ou avisar que será necessário novo login |
-| Tarefas agendadas (ex.: multas, renovações) executando em duplicidade nos dois ambientes | Manter agendadores ativos em apenas um ambiente por vez |
+| Tarefas agendadas executando em duplicidade nos dois ambientes | Manter agendadores ativos em apenas um ambiente por vez |
 | Excesso de conexões no banco com os dois ambientes ativos | Limitar o pool de conexões de cada ambiente |
 | Migração que trava tabelas no pico de uso | Aplicar migrações fora do pico e em etapas pequenas |
 | Green sem capacidade para o pico do semestre | Dimensionar o Green igual ao Blue e evitar deploy no pico |
