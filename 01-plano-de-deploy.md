@@ -142,7 +142,16 @@ Responsável pelos testes: executa os testes e registra as evidências.
 
 Em uma equipe pequena, uma pessoa poderá acumular funções, desde que as responsabilidades estejam definidas.
 
- 11. Critério de Conclusão
+ 11. Riscos e Mitigações
+
+- Falha na nova versão: executar testes antes da implantação e manter a versão anterior disponível para rollback;
+- Incompatibilidade com o banco de dados: verificar a compatibilidade entre as versões e realizar um backup antes do deploy;
+- Aumento da taxa de erros ou da latência: monitorar as métricas antes e depois da troca de tráfego e interromper a implantação se os critérios definidos não forem atendidos;
+- Falha nas operações de empréstimo ou devolução: executar smoke tests com dados controlados antes de liberar o tráfego principal;
+- Indisponibilidade superior ao limite permitido: testar previamente a troca de tráfego e definir responsáveis pela recuperação;
+- Perda de dados durante a recuperação: avaliar a integridade do banco antes de restaurar backups e preservar operações válidas;
+
+ 12. Critério de Conclusão
 
 O deploy será considerado concluído quando os testes forem aprovados, as operações críticas funcionarem corretamente, as métricas permanecerem dentro dos limites definidos e a implantação estiver registrada.
 
