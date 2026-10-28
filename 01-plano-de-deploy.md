@@ -1,6 +1,6 @@
 
  01 — Plano de Deploy 
-
+ 
  1. Objetivo
 
 Implantar uma nova versão do sistema web de biblioteca de forma segura, mantendo a indisponibilidade dentro do limite máximo de 5 minutos e evitando falhas nas operações de empréstimo de livros.
