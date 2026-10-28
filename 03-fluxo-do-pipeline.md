@@ -5,7 +5,7 @@
 
 Representar o fluxo de Entrega Contínua (CD), desde a alteração do código até a implantação, observação das métricas e eventual rollback.
 
- 2. Diagrama
+ 2. Diagrama 
 
 ```mermaid
 flowchart TD
