@@ -1,88 +1,112 @@
+# 02 — Plano de Rollback
 
- 02 — Plano de Rollback
-
- 1. Objetivo
+## 1. Objetivo
 
 Definir um procedimento de recuperação para retornar o sistema web de biblioteca a uma versão estável caso a nova versão apresente falhas após a implantação.
 
 O objetivo é reduzir o impacto sobre os usuários e manter a indisponibilidade dentro do limite máximo tolerado de 5 minutos.
 
- 2. Gatilhos para Rollback
+## 2. Gatilhos para Rollback
 
-O rollback deverá ser iniciado quando ocorrer pelo menos uma das seguintes situações:
+O rollback é iniciado quando ocorrer pelo menos uma das situações abaixo. Os limites numéricos vêm da tabela da [seção 9 do plano de deploy](01-plano-de-deploy.md).
 
- Taxa de erros igual ou superior a 2% durante 5 minutos consecutivos, após a troca de tráfego;
- Latência p95 superior a 1 segundo por 5 minutos consecutivos, quando esse limite representar degradação em relação à linha de base aprovada;
- Falha crítica nos testes de empréstimo ou devolução;
- Erros que impeçam login, consulta de livros ou registro de empréstimos;
- Inconsistência ou corrupção de dados confirmada;
- Falha de saúde da aplicação que impeça o atendimento das requisições;
- Indisponibilidade próxima do limite de 5 minutos, sem perspectiva de recuperação imediata;
+| Gatilho | Quando iniciar |
+|---------|----------------|
+| Taxa de erros ≥ 2% | Após 5 minutos consecutivos, depois da troca de tráfego |
+| Latência p95 > 1 s | Após 5 minutos consecutivos, quando representar degradação frente à linha de base aprovada |
+| Falha crítica em empréstimo ou devolução | Imediatamente |
+| Erros que impeçam login, consulta de livros ou registro de empréstimos | Imediatamente |
+| Inconsistência ou corrupção de dados confirmada | Imediatamente |
+| Falha de saúde que impeça o atendimento das requisições | Imediatamente |
+| Indisponibilidade total confirmada | Imediatamente, pois detecção e troca precisam caber nos 5 minutos |
 
-Para falhas críticas, como corrupção de dados ou impossibilidade de registrar empréstimos corretamente, a equipe não deverá esperar 5 minutos para iniciar a recuperação.
+Para falhas críticas, a equipe **não espera** 5 minutos para iniciar a recuperação. A janela de 5 minutos vale para **degradação** (erros ou lentidão); no caso de sistema fora do ar, o rollback começa assim que a falha é confirmada.
 
-Os limites numéricos são critérios iniciais propostos para o plano e deverão ser confirmados com as métricas reais do sistema.
+Os limites são metas iniciais propostas e devem ser confirmados com as métricas reais do sistema.
 
- 3. Procedimento de Rollback:
+## 3. Procedimento de Rollback
 
- 1. Confirmar a falha por meio das métricas, logs e testes;
- 2. Interromper novas etapas de implantação;
- 3. Comunicar a decisão ao responsável pelo deploy e ao restante da equipe;
- 4 .Redirecionar o tráfego principal para o ambiente Blue, que mantém a versão estável 1.0.0;
-5. Confirmar que a versão anterior está saudável e recebendo requisições;
-6. Desativar a funcionalidade nova por meio de uma feature flag, caso essa opção esteja implementada e seja necessária;
-7. Verificar login, consulta de livros, empréstimos e devoluções;
-8. Conferir os registros e a integridade dos dados no banco compartilhado;
-9. Monitorar as métricas após a recuperação;
-10. Registrar o incidente, a causa identificada, as ações executadas e os resultados;
+1. Confirmar a falha por meio das métricas, logs e testes.
+2. Interromper novas etapas de implantação.
+3. Comunicar a decisão ao responsável pelo deploy e ao restante da equipe.
+4. Redirecionar o tráfego principal para o ambiente Blue, que mantém a versão estável 1.0.0.
+5. Confirmar que a versão anterior está saudável e recebendo requisições.
+6. Desativar a funcionalidade nova por meio de feature flag, caso essa opção esteja implementada e seja necessária.
+7. Verificar login, consulta de livros, empréstimos e devoluções.
+8. Conferir os registros e a integridade dos dados no banco compartilhado.
+9. Monitorar as métricas após a recuperação.
+10. Registrar o incidente, a causa identificada, as ações executadas e os resultados.
 
-O ambiente Blue somente poderá ser utilizado como destino de recuperação se continuar íntegro, disponível e compatível com o estado atual do banco de dados.
+O ambiente Blue só pode ser usado como destino se continuar íntegro, disponível e compatível com o estado atual do banco.
 
- 4. Recuperação da Aplicação:
+### Exemplos de como executar o passo 4
 
-A recuperação da aplicação será feita pelo redirecionamento do tráfego para o ambiente Blue, que executa a versão 1.0.0.
+Exemplos ilustrativos: o comando real depende da infraestrutura usada.
 
-O artefato anterior deverá permanecer identificado e disponível durante o deploy. A equipe não deverá depender da reconstrução da versão antiga durante o incidente.
+```bash
+# Nginx: trocar o servidor ativo do upstream de Green para Blue e recarregar
+sudo nginx -t && sudo nginx -s reload
 
- 5. Recuperação da Configuração:
+# Kubernetes: apontar o Service de volta para os pods da versão Blue
+kubectl patch service biblioteca -p '{"spec":{"selector":{"versao":"blue"}}}'
+```
 
-As configurações anteriores deverão estar registradas e disponíveis para restauração;
+Esse passo deve ser **ensaiado antes** do deploy, para que o rollback seja realmente executável.
 
-Segredos e credenciais deverão permanecer em mecanismos protegidos, sem serem publicados no repositório;
+## 4. Tempo de Recuperação
 
-Se uma alteração de configuração causar a falha, a equipe deverá restaurar a configuração aprovada da versão anterior;
+| Etapa | Meta proposta |
+|-------|---------------|
+| Detecção | Imediata para falhas críticas; até 5 min de janela para degradação |
+| Decisão | Até 1 min após a confirmação |
+| Troca de tráfego de volta para o Blue | Até 2 min após a decisão |
+| Verificação rápida (smoke tests) | Logo após a troca |
 
- 6. Banco de Dados Compartilhado:
+A meta de recuperação completa é de até 5 minutos de **indisponibilidade**, conforme o limite do cenário.
 
-O rollback da aplicação não significa desfazer automaticamente as alterações no banco de dados.
+Esses tempos são objetivos de planejamento, não resultados comprovados. A equipe deve realizar um teste de rollback em ambiente controlado e medir o tempo real.
+
+## 5. Recuperação da Aplicação
+
+A recuperação é feita pelo redirecionamento do tráfego para o ambiente Blue, que executa a versão 1.0.0.
+
+O artefato anterior permanece identificado e disponível durante o deploy. A equipe não depende da reconstrução da versão antiga durante o incidente.
+
+## 6. Recuperação da Configuração
+
+- As configurações anteriores ficam registradas e disponíveis para restauração.
+- Segredos e credenciais permanecem em mecanismos protegidos, sem serem publicados no repositório.
+- Se uma alteração de configuração causou a falha, restaura-se a configuração aprovada da versão anterior.
+
+## 7. Banco de Dados Compartilhado
+
+O rollback da aplicação **não** desfaz automaticamente as alterações no banco.
 
 Para reduzir o risco:
+- realizar backup antes da implantação;
+- verificar a compatibilidade da versão 1.0.0 com o banco atualizado;
+- preferir migrações aditivas (padrão expandir e contrair do [plano de deploy](01-plano-de-deploy.md));
+- não remover colunas ou estruturas antigas no mesmo momento da implantação;
+- evitar alterações destrutivas que impeçam o funcionamento da versão anterior;
+- verificar empréstimos criados ou alterados durante a janela de falha;
+- preservar registros válidos e investigar inconsistências antes de qualquer correção.
 
-Realizar backup antes da implantação;
- Verificar a compatibilidade da versão 1.0.0 com o banco atualizado;
-Preferir migrações aditivas e compatíveis com a versão anterior;
- Não remover colunas ou estruturas antigas no mesmo momento da implantação;
- Evitar alterações destrutivas que impeçam o funcionamento da versão anterior;
- Verificar empréstimos criados ou alterados durante a janela de falha;
- Preservar registros válidos e investigar inconsistências antes de qualquer correção;
+Se houver corrupção de dados, a equipe interrompe as operações afetadas e avalia uma recuperação específica do banco. Restaurar um backup completo pode eliminar operações legítimas feitas depois dele, por isso essa ação exige análise e autorização do responsável pelos dados.
 
-Se houver corrupção de dados, a equipe deverá interromper as operações afetadas e avaliar uma recuperação específica do banco. Restaurar um backup completo pode eliminar operações legítimas realizadas depois dele; portanto, essa ação exige análise e autorização do responsável pelos dados.
+## 8. Rollback ou Roll Forward?
 
-Se a nova versão introduzir uma alteração incompatível ou irreversível no banco, poderá ser mais seguro corrigir o problema com uma nova versão (roll forward) do que retornar imediatamente à versão anterior.
+| Situação | Decisão |
+|----------|---------|
+| Versão anterior compatível com o banco e dados íntegros | **Rollback** (primeira opção) |
+| Mudança no banco irreversível ou versão anterior incompatível | **Roll forward** |
+| Falha pequena e bem compreendida, com correção rápida e segura | **Roll forward** |
+| Reversão causaria impacto maior que a correção | **Roll forward** |
 
- 7. Tempo de Recuperação:
+O roll forward exige capacidade de produzir e validar uma correção rapidamente.
 
-Meta proposta: concluir a troca de tráfego de volta para a versão anterior em até 2 minutos após a decisão de rollback.
+## 9. Comunicação
 
-A meta de recuperação completa é de até 5 minutos de indisponibilidade, conforme o limite do cenário.
-
-Esses tempos são objetivos de planejamento, não resultados já comprovados. A equipe deverá realizar um teste de rollback em ambiente controlado e medir o tempo real de recuperação.
-
-O tempo de detecção da falha também deverá ser considerado no planejamento.
-
- 8. Comunicação
-
-Durante o incidente, o responsável deverá:
+Durante o incidente, o responsável deve:
 
 1. Avisar a equipe sobre a falha e a decisão de rollback.
 2. Informar o responsável pelo sistema e os usuários afetados, conforme o procedimento da organização.
@@ -90,43 +114,40 @@ Durante o incidente, o responsável deverá:
 4. Comunicar quando o serviço estiver novamente estável.
 5. Apresentar um resumo da causa e das medidas preventivas.
 
-
- 9. Evidências do Incidente
+## 10. Evidências do Incidente
 
 Devem ser registrados:
 
-- Versão implantada e versão restaurada.
-- Horário de detecção e de início do rollback.
-- Taxa de erros e latência observadas.
-- Logs relevantes, sem expor senhas ou dados pessoais.
-- Resultado dos testes após a recuperação.
-- Tempo real de indisponibilidade.
-- Estado do banco de dados.
-- Responsáveis pelas decisões.
-- Causa identificada e ações preventivas.
+- versão implantada e versão restaurada;
+- horário de detecção e de início do rollback;
+- taxa de erros e latência observadas;
+- logs relevantes, sem expor senhas ou dados pessoais;
+- resultado dos testes após a recuperação;
+- tempo real de indisponibilidade;
+- estado do banco de dados;
+- responsáveis pelas decisões;
+- causa identificada e ações preventivas.
 
- 10. Critérios de Encerramento
+## 11. Critérios de Encerramento
 
-O incidente poderá ser encerrado quando:
+O incidente pode ser encerrado quando:
 
-- A versão estável estiver atendendo às requisições.
-- Os smoke tests forem aprovados.
-- As operações de empréstimo e devolução estiverem funcionando.
-- A integridade dos dados tiver sido verificada.
-- As métricas estiverem dentro dos limites aprovados.
-- As evidências e a comunicação do incidente estiverem registradas.
+- a versão estável estiver atendendo às requisições;
+- os smoke tests forem aprovados;
+- as operações de empréstimo e devolução estiverem funcionando;
+- a integridade dos dados tiver sido verificada;
+- as métricas estiverem dentro dos limites aprovados;
+- as evidências e a comunicação do incidente estiverem registradas.
 
- 11. Rollback ou Roll Forward?
+## 12. Riscos e Mitigações
 
-O rollback será a primeira opção quando a versão anterior continuar compatível com o banco de dados e os dados estiverem íntegros.
-
-O roll forward será considerado quando a mudança no banco for irreversível, quando a versão anterior não for compatível ou quando uma correção rápida e segura representar menor risco do que a reversão.
-
-## Riscos e Mitigações
-
-| Risco | Mitigação |
-|-------|-----------|
-| Falha durante o deploy | Executar rollback imediato. |
-| Aumento da latência | Monitorar métricas e reverter se necessário. |
-| Erro após publicação | Restaurar a versão anterior. |
-| Incompatibilidade no banco | Utilizar alterações compatíveis e validar antes da produção. |
+| Risco | Impacto | Mitigação |
+|-------|---------|-----------|
+| Falha durante o deploy | Versão nova com erro | Abortar antes da troca; após a troca, executar rollback imediato |
+| Aumento da latência | Lentidão para os usuários | Monitorar as métricas e reverter se passar do limite por 5 min |
+| Erro após a publicação | Funcionalidade quebrada | Redirecionar o tráfego para o Blue |
+| Incompatibilidade no banco | Blue não consegue operar | Alterações compatíveis (expandir e contrair) e validação antes da produção |
+| Blue desligado ou desatualizado | Sem destino de rollback | Manter o Blue ativo até o fim da validação |
+| Rollback mais lento que o previsto | Indisponibilidade acima de 5 min | Ensaiar o rollback e medir o tempo real |
+| Perda de empréstimos registrados durante a falha | Dados legítimos perdidos | Conferir os registros da janela e evitar restaurar backup completo sem análise |
+| Sem feature flag para desativar a função nova | Rollback só por troca de ambiente | Usar o redirecionamento ao Blue como mecanismo principal |
