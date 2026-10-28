@@ -5,7 +5,7 @@
 
 Representar o fluxo de Entrega Contínua (CD), desde a alteração do código até a implantação, observação das métricas e eventual rollback.
 
- 2. Diagrama 
+ 2. Diagrama
 
 ```mermaid
 flowchart TD
@@ -14,7 +14,7 @@ flowchart TD
     C -->|Não| D[Interromper e corrigir]
     D --> A
     C -->|Sim| E[Gerar e identificar artefato]
-   E --> F[Promover o mesmo artefato sem recompilar]
+    E --> F[Promover o mesmo artefato sem recompilar]
     F --> G[Homologação]
     G --> H{Testes funcionais aprovados?}
     H -->|Não| D
@@ -36,7 +36,6 @@ flowchart TD
     S --> V[Fim: deploy concluído]
     U --> W[Fim: rollback registrado]
 ```
-
 3. Gates do Pipeline
 
 Os gates são condições obrigatórias para que a implantação avance.
