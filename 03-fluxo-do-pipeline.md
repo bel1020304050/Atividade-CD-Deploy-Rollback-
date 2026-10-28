@@ -25,7 +25,7 @@ flowchart TD
     K --> L[Implantar no ambiente Green]
     L --> M[Health checks e smoke tests]
     M --> N{Validações aprovadas?}
-    N -->|Não| R[Rollback para Blue]
+    N -->|Não| R[Rollback para Blue] 
     N -->|Sim| O[Direcionar tráfego para Green]
     O --> P[Monitorar erros e latência por 15 minutos]
     P --> Q{Critérios de sucesso mantidos?}
