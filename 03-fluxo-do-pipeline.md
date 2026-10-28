@@ -1,11 +1,10 @@
+# 03 — Fluxo do Pipeline de Deploy
 
- 03 — Fluxo do Pipeline de Deploy    
+## 1. Objetivo
 
- 1. Objetivo
+Representar o fluxo de Entrega Contínua (CD), desde a alteração do código até a implantação, a observação das métricas e o eventual rollback.
 
-Representar o fluxo de Entrega Contínua (CD), desde a alteração do código até a implantação, observação das métricas e eventual rollback.
-
- 2. Diagrama
+## 2. Diagrama do Pipeline
 
 ```mermaid
 flowchart TD
@@ -25,61 +24,75 @@ flowchart TD
     K --> L[Implantar no ambiente Green]
     L --> M[Health checks e smoke tests]
     M --> N{Validações aprovadas?}
-    N -->|Não| R[Rollback para Blue] 
+    N -->|Não| X["Abortar: tráfego permanece no Blue"]
+    X --> D
     N -->|Sim| O[Direcionar tráfego para Green]
     O --> P[Monitorar erros e latência por 15 minutos]
     P --> Q{Critérios de sucesso mantidos?}
     Q -->|Sim| S[Registrar sucesso e manter monitoramento]
-    Q -->|Não| R
+    Q -->|Não| R["Rollback: tráfego volta para o Blue"]
     R --> T[Verificar aplicação e banco]
     T --> U[Registrar incidente e evidências]
     S --> V[Fim: deploy concluído]
     U --> W[Fim: rollback registrado]
 ```
-3. Gates do Pipeline
 
-Os gates são condições obrigatórias para que a implantação avance.
+Se a validação do Green falhar **antes** da troca, o tráfego nunca saiu do Blue; por isso o caminho é "abortar", e não "rollback". O rollback só existe depois que o tráfego foi para o Green.
 
- Gate 1 — Qualidade
-Os testes obrigatórios e as verificações de segurança devem ser aprovados.
+## 3. Arquitetura Blue/Green em Produção
 
- Gate 2 — Homologação
-As funcionalidades críticas, especialmente empréstimos e devoluções, devem funcionar corretamente.
+```mermaid
+flowchart LR
+    U[Usuários] --> R[Roteador / balanceador]
+    R -->|tráfego principal| B["Blue: versão 1.0.0"]
+    R -.->|troca de tráfego após validação| G["Green: versão 1.1.0"]
+    B --> DB[("Banco de dados compartilhado")]
+    G --> DB
+```
 
- Gate 3 — Banco de Dados
-A compatibilidade entre as versões da aplicação e o banco compartilhado deve estar confirmada.
+Os dois ambientes usam o mesmo banco, por isso as alterações precisam ser compatíveis com as duas versões (ver [01-plano-de-deploy.md](01-plano-de-deploy.md), seção 5).
 
- Gate 4 — Saúde da Aplicação
-Os health checks e os smoke tests devem ser aprovados antes da troca de tráfego.
+## 4. Gates do Pipeline
 
- Gate 5 — Observabilidade
-Após a troca, a equipe deve acompanhar a taxa de erros, a latência e as operações críticas.
+Gates são condições obrigatórias para que a implantação avance.
 
- Gate 6 — Rollback
-Se os critérios críticos falharem, o tráfego deverá retornar à versão estável, desde que ela seja compatível com o estado atual do banco.
+| Gate | Condição para avançar | Se falhar |
+|------|----------------------|-----------|
+| 1 — Qualidade | Testes obrigatórios e verificações de segurança aprovados | Interromper e corrigir |
+| 2 — Homologação | Funcionalidades críticas, especialmente empréstimos e devoluções, funcionando | Interromper e corrigir |
+| 3 — Banco de dados | Compatibilidade com as duas versões confirmada e backup verificado | Interromper e corrigir |
+| 4 — Saúde da aplicação | Health checks e smoke tests aprovados no Green | Abortar; tráfego permanece no Blue |
+| 5 — Observabilidade | Erros, latência e operações críticas dentro dos limites após a troca | Acionar o rollback |
+| 6 — Rollback | Se os critérios críticos falharem, o tráfego volta à versão estável (desde que compatível com o banco) | Avaliar roll forward |
 
- 4. Métricas Observadas
+Antes da troca de tráfego há também a **aprovação manual** do responsável pelo deploy, registrada com evidências e critérios.
 
-- Taxa de erros: meta inicial inferior a 2%.
-- Latência p95: meta inicial inferior a 1 segundo, ou dentro do limite operacional aprovado.
-- Health checks: aplicação apta a receber tráfego.
-- Operações de empréstimo: conclusão correta e sem inconsistências.
-- Tempo de recuperação: meta de planejamento de até 5 minutos de indisponibilidade.
+## 5. Métricas Observadas
+
+Os limites completos estão na tabela da [seção 9 do plano de deploy](01-plano-de-deploy.md). Resumo:
+
+- **Taxa de erros:** meta inicial inferior a 2%.
+- **Latência p95:** meta inicial inferior a 1 segundo, ou dentro do limite operacional aprovado.
+- **Health checks:** aplicação apta a receber tráfego (readiness).
+- **Operações de empréstimo:** conclusão correta e sem inconsistências.
+- **Tempo de recuperação:** meta de planejamento de até 5 minutos de indisponibilidade.
 
 Os valores são metas propostas para a atividade e precisam ser validados com os dados reais do serviço.
 
- 5. Evidências da Implantação
+## 6. Evidências da Implantação
 
-A equipe deverá guardar: 
+A equipe deve guardar:
 
-- Identificação do commit e da versão.
-- Resultados dos testes.
-- Aprovação da implantação.
-- Resultado dos smoke tests.
-- Métricas antes e depois do deploy.
-- Horários de implantação e de eventual rollback.
-- Resultado da verificação do banco de dados.
+- identificação do commit e da versão;
+- resultados dos testes;
+- aprovação da implantação;
+- resultado dos smoke tests;
+- métricas antes e depois do deploy;
+- horários de implantação e de eventual rollback;
+- resultado da verificação do banco de dados.
 
- 6. Conclusão
+O modelo de registro está na seção 13 do [plano de deploy](01-plano-de-deploy.md).
+
+## 7. Conclusão
 
 O pipeline proposto estabelece verificações antes e depois do deploy. A promoção depende de critérios objetivos e a recuperação possui um fluxo definido. A estratégia Blue/Green, combinada com testes, compatibilidade do banco e observabilidade, busca reduzir o risco de falhas e manter a disponibilidade do sistema.
