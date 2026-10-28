@@ -39,26 +39,13 @@ Os limites são metas iniciais propostas e devem ser confirmados com as métrica
 
 O ambiente Blue só pode ser usado como destino se continuar íntegro, disponível e compatível com o estado atual do banco.
 
-### Exemplos de como executar o passo 4
-
-Exemplos ilustrativos: o comando real depende da infraestrutura usada.
-
-```bash
-# Nginx: trocar o servidor ativo do upstream de Green para Blue e recarregar
-sudo nginx -t && sudo nginx -s reload
-
-# Kubernetes: apontar o Service de volta para os pods da versão Blue
-kubectl patch service biblioteca -p '{"spec":{"selector":{"versao":"blue"}}}'
-```
-
-Esse passo deve ser **ensaiado antes** do deploy, para que o rollback seja realmente executável.
+O passo 4 (troca de rota de volta para o Blue) deve ser **ensaiado antes** do deploy, para que o rollback seja realmente executável e o tempo de recuperação seja conhecido.
 
 ## 4. Tempo de Recuperação
 
 | Etapa | Meta proposta |
 |-------|---------------|
 | Detecção | Imediata para falhas críticas; até 5 min de janela para degradação |
-| Decisão | Até 1 min após a confirmação |
 | Troca de tráfego de volta para o Blue | Até 2 min após a decisão |
 | Verificação rápida (smoke tests) | Logo após a troca |
 
